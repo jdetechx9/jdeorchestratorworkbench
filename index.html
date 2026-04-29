@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JDE Orchestrator Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0f1117;
+    --bg2:       #161b27;
+    --bg3:       #1e2535;
+    --surface:   #1a2030;
+    --surface2:  #212840;
+    --border:    #2a3348;
+    --border2:   #364060;
+    --text:      #e8eaf0;
+    --text2:     #a0a8be;
+    --text3:     #606880;
+    --accent:    #4f8ef7;
+    --accent2:   #3b7de8;
+    --accent-bg: rgba(79,142,247,0.12);
+    --green:     #34d399;
+    --green-bg:  rgba(52,211,153,0.1);
+    --red:       #f87171;
+    --red-bg:    rgba(248,113,113,0.1);
+    --yellow:    #fbbf24;
+    --yellow-bg: rgba(251,191,36,0.1);
+    --purple:    #a78bfa;
+    --purple-bg: rgba(167,139,250,0.1);
+    --radius:    10px;
+    --radius-sm: 6px;
+    --shadow:    0 2px 8px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── TOP CONFIG BAR ── */
+  .config-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 58px;
+    flex-shrink: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-right: 6px;
+  }
+  .brand-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #4f8ef7 0%, #7c5cf8 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+  .brand-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .brand-sub  { font-size: 10px; color: var(--text3); letter-spacing: 0.3px; }
+
+  .config-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+
+  .config-fields {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cfg-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .cfg-field.url-field { flex: 2; min-width: 180px; }
+  .cfg-field.cred-field { flex: 1; min-width: 100px; }
+  .cfg-field.opt-field { flex: 1; min-width: 90px; }
+
+  .cfg-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  .cfg-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 5px 9px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .cfg-input::placeholder { color: var(--text3); }
+  .cfg-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-bg);
+  }
+  input[type="password"].cfg-input { letter-spacing: 3px; font-size: 11px; }
+
+  .load-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 16px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .load-btn:hover { background: var(--accent2); }
+  .load-btn:active { transform: scale(0.97); }
+  .load-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .conn-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .conn-pill.idle    { background: var(--bg3); color: var(--text3); }
+  .conn-pill.ok      { background: var(--green-bg); color: var(--green); }
+  .conn-pill.loading { background: var(--yellow-bg); color: var(--yellow); }
+  .conn-pill.err     { background: var(--red-bg); color: var(--red); }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+  }
+  .dot.pulse { animation: pulse 1.5s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── MAIN LAYOUT ── */
+  .app-body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: calc(100vh - 58px);
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-head {
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .search-wrap { position: relative; }
+  .search-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 7px 10px 7px 32px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input::placeholder { color: var(--text3); }
+  .search-input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  .orch-count {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+
+  .orch-list { flex: 1; overflow-y: auto; padding: 6px; }
+
+  .orch-item {
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+    transition: all 0.12s;
+  }
+  .orch-item:hover { background: var(--bg3); border-color: var(--border); }
+  .orch-item.active {
+    background: var(--accent-bg);
+    border-color: rgba(79,142,247,0.3);
+  }
+  .orch-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .orch-item.active .orch-name { color: var(--accent); }
+  .orch-desc {
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .orch-badge {
+    display: inline-flex; align-items: center;
+    font-size: 9px; padding: 1px 6px;
+    border-radius: 999px; font-weight: 600;
+    margin-top: 4px; letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .badge-shared   { background: rgba(52,211,153,0.12); color: var(--green); }
+  .badge-personal { background: rgba(251,191,36,0.12); color: var(--yellow); }
+  .badge-reserved { background: var(--purple-bg); color: var(--purple); }
+
+  .list-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .list-empty .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.4; }
+
+  .list-loading {
+    padding: 20px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* WELCOME */
+  .welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .welcome-icon { font-size: 52px; opacity: 0.2; }
+  .welcome h2 { font-size: 18px; font-weight: 600; color: var(--text2); }
+  .welcome p { font-size: 13px; color: var(--text3); max-width: 360px; line-height: 1.7; }
+  .welcome-steps {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .welcome-step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px; color: var(--text2);
+  }
+  .step-num {
+    width: 20px; height: 20px;
+    background: var(--accent-bg);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* WORKBENCH */
+  .workbench { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .workbench.visible { display: flex; }
+
+  /* Orch header */
+  .orch-header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .method-tag {
+    background: linear-gradient(135deg, #4f8ef7, #7c5cf8);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .orch-info { flex: 1; min-width: 0; }
+  .orch-title-main {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .endpoint-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .orch-header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .icon-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 500;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+
+  /* Split pane */
+  .split-pane {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+  .pane { display: flex; flex-direction: column; overflow: hidden; }
+  .pane:first-child { border-right: 1px solid var(--border); }
+
+  .pane-header {
+    padding: 10px 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pane-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text3);
+  }
+  .pane-actions { display: flex; gap: 4px; }
+
+  /* Payload tabs */
+  .payload-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .payload-tab {
+    padding: 8px 14px;
+    font-size: 11px; font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .payload-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .payload-tab:hover:not(.active) { color: var(--text2); }
+
+  /* Form inputs */
+  .inputs-scroll { flex: 1; overflow-y: auto; }
+  .inputs-form { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .input-group { display: flex; flex-direction: column; gap: 5px; }
+  .input-label {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--text3);
+  }
+  .req-star { color: var(--red); font-size: 11px; }
+  .type-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .form-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-input::placeholder { color: var(--text3); }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-bg);
+  }
+  textarea.form-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    resize: vertical;
+    min-height: 70px;
+    line-height: 1.6;
+  }
+  .input-hint { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+  /* Array builder */
+  .array-builder { display: flex; flex-direction: column; gap: 6px; }
+  .array-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .array-row-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    padding-top: 8px;
+    min-width: 18px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .array-row-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+  }
+  .array-row-fields.simple {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 8px;
+  }
+  .array-kv {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .array-kv-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  .array-inner-input {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    outline: none;
+    flex: 1;
+    transition: border-color 0.15s;
+  }
+  .array-inner-input:focus { border-color: var(--accent); }
+  .array-inner-input::placeholder { color: var(--text3); }
+  .array-del-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text3);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.12s;
+  }
+  .array-del-btn:hover { color: var(--red); border-color: var(--red-bg); background: var(--red-bg); }
+  .array-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1px dashed var(--border2);
+    color: var(--text3);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.12s;
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .array-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  .array-raw-toggle {
+    font-size: 10px;
+    color: var(--text3);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 2px;
+    display: inline-block;
+  }
+  .array-raw-toggle:hover { color: var(--accent); }
+
+  /* Code editor */
+  .code-editor {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    background: var(--bg);
+    color: var(--text);
+    overflow-y: auto;
+  }
+
+  /* Send bar */
+  .send-bar {
+    padding: 12px 16px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .send-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--green);
+    color: #052e16;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    padding: 8px 20px;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .send-btn:hover { background: #2fd38a; }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sending-indicator {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .endpoint-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    margin-left: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+  }
+
+  /* Response pane */
+  .resp-empty {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--text3); font-size: 12px;
+    gap: 10px;
+  }
+  .resp-empty-icon { font-size: 36px; opacity: 0.2; }
+
+  .resp-meta {
+    padding: 10px 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+  }
+  .resp-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .resp-ok  { background: var(--green-bg); color: var(--green); }
+  .resp-err { background: var(--red-bg);   color: var(--red);   }
+  .resp-time { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  .resp-size { font-size: 11px; color: var(--text3); }
+
+  .resp-body {
+    flex: 1; overflow-y: auto; padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; line-height: 1.8;
+    white-space: pre-wrap; word-break: break-all;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* JSON syntax */
+  .json-str  { color: #86efac; }
+  .json-num  { color: #7dd3fc; }
+  .json-bool { color: var(--yellow); }
+  .json-null { color: var(--text3); }
+  .json-key  { color: #c4b5fd; }
+
+  /* Toast */
+  .toast-wrap {
+    position: fixed; bottom: 20px; right: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 9999;
+  }
+  .toast {
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 500;
+    animation: toastIn 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+    max-width: 340px;
+    box-shadow: var(--shadow-lg);
+  }
+  .toast-success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+  .toast-error   { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(248,113,113,0.3); }
+  .toast-info    { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); }
+  @keyframes toastIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Schema modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .modal-bg.show { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-title {
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-close {
+    background: none; border: none; color: var(--text3);
+    font-size: 18px; cursor: pointer; padding: 0 4px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .schema-field {
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+  }
+  .schema-row { display: flex; align-items: center; gap: 8px; }
+  .schema-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
+  .schema-type { font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  .schema-req  { font-size: 9px; color: var(--red); font-weight: 700; text-transform: uppercase; }
+  .schema-detail { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  .section-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text3); margin: 14px 0 8px;
+  }
+
+  /* History panel (bottom of sidebar) */
+  .sidebar-footer {
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .history-toggle {
+    padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+    font-size: 11px; font-weight: 600;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px;
+    user-select: none;
+  }
+  .history-toggle:hover { color: var(--text2); }
+  .history-panel {
+    overflow-y: auto;
+    max-height: 200px;
+  }
+  .history-item {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .history-item:hover { background: var(--bg3); }
+  .h-name { font-size: 11px; font-weight: 500; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .h-meta { display: flex; gap: 8px; margin-top: 2px; align-items: center; }
+  .h-status { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .h-ok  { background: var(--green-bg); color: var(--green); }
+  .h-err { background: var(--red-bg);   color: var(--red); }
+  .h-time { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  .h-empty { padding: 16px 12px; font-size: 11px; color: var(--text3); text-align: center; }
+
+  @media (max-width: 860px) {
+    .split-pane { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .pane:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .cfg-field.opt-field { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CONFIG BAR -->
+<div class="config-bar">
+  <div class="brand">
+    <div class="brand-icon">JDE</div>
+    <div>
+      <div class="brand-name">Orchestrator Workbench</div>
+      <div class="brand-sub">AIS REST API Explorer</div>
+    </div>
+  </div>
+
+  <div class="config-sep"></div>
+
+  <div class="config-fields">
+    <div class="cfg-field url-field">
+      <div class="cfg-label">AIS Server URL</div>
+      <input class="cfg-input" type="url" id="aisUrl" placeholder="AIS Server URL" autocomplete="off" oninput="validateFields()">
+    </div>
+    <div class="cfg-field cred-field">
+      <div class="cfg-label">Username</div>
+      <input class="cfg-input" type="text" id="username" placeholder="Username" autocomplete="off" oninput="validateFields()">
+    </div>
+    <div class="cfg-field cred-field">
+      <div class="cfg-label">Password</div>
+      <input class="cfg-input" type="password" id="password" placeholder="Password" autocomplete="off" oninput="validateFields()">
+    </div>
+    <div class="cfg-field opt-field">
+      <div class="cfg-label">Environment <span style="opacity:0.5;font-weight:400">(opt)</span></div>
+      <input class="cfg-input" type="text" id="environment" placeholder="JDV920">
+    </div>
+    <div class="cfg-field opt-field">
+      <div class="cfg-label">Role <span style="opacity:0.5;font-weight:400">(opt)</span></div>
+      <input class="cfg-input" type="text" id="role" placeholder="*ALL">
+    </div>
+  </div>
+
+  <button class="load-btn" id="loadBtn" onclick="loadOrchestrations()" disabled>
+    <span>⚡</span> Load Orchestrations
+  </button>
+
+  <div class="conn-pill idle" id="connPill">
+    <div class="dot"></div>
+    <span id="connText">Ready</span>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="orchSearch" placeholder="Search orchestrations…" oninput="filterOrchestrations()">
+      </div>
+      <div class="orch-count" id="orchCount"></div>
+    </div>
+
+    <div class="orch-list" id="orchList">
+      <div class="list-empty">
+        <div class="empty-icon">⚙️</div>
+        Enter your credentials above and click <strong>Load Orchestrations</strong> to get started.
+      </div>
+    </div>
+
+    <!-- History footer -->
+    <div class="sidebar-footer">
+      <div class="history-toggle" onclick="toggleHistory()">
+        <span>📋 Recent Requests</span>
+        <span id="historyChevron">▲</span>
+      </div>
+      <div class="history-panel" id="historyPanel">
+        <div class="h-empty" id="historyEmpty">No requests yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+    <!-- Welcome -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-icon">🎛️</div>
+      <h2>Select an Orchestration</h2>
+      <p>Load your orchestrations using the bar above, then pick one from the list to build and send requests.</p>
+      <div class="welcome-steps">
+        <div class="welcome-step"><div class="step-num">1</div> Enter credentials</div>
+        <div class="welcome-step"><div class="step-num">2</div> Load orchestrations</div>
+        <div class="welcome-step"><div class="step-num">3</div> Select &amp; send</div>
+      </div>
+    </div>
+
+    <!-- Workbench -->
+    <div class="workbench" id="workbench">
+      <!-- Orch header -->
+      <div class="orch-header">
+        <div class="method-tag">POST</div>
+        <div class="orch-info">
+          <div class="orch-title-main" id="orchTitle">—</div>
+          <div class="endpoint-path" id="orchEndpoint">—</div>
+        </div>
+        <div class="orch-header-actions">
+          <button class="icon-btn" onclick="showSchemaModal()">📐 Schema</button>
+        </div>
+      </div>
+
+      <!-- Split -->
+      <div class="split-pane">
+        <!-- LEFT: Request -->
+        <div class="pane">
+          <div class="payload-tabs">
+            <button class="payload-tab active" id="tab-form-btn" onclick="switchTab('form', this)">Form Builder</button>
+            <button class="payload-tab" id="tab-raw-btn" onclick="switchTab('raw', this)">Raw JSON</button>
+          </div>
+
+          <!-- Form view -->
+          <div class="inputs-scroll" id="tab-form">
+            <div class="inputs-form" id="formInputs"></div>
+          </div>
+
+          <!-- Raw JSON view -->
+          <textarea class="code-editor" id="rawPayload" style="display:none" spellcheck="false" placeholder='{ "key": "value" }'></textarea>
+
+          <!-- Send bar -->
+          <div class="send-bar">
+            <button class="send-btn" id="sendBtn" onclick="sendRequest()" disabled>
+              ▶ Send Request
+            </button>
+            <div class="sending-indicator" id="sendingIndicator">
+              <div class="spinner"></div>
+              <span>Sending…</span>
+            </div>
+            <div class="endpoint-display" id="endpointHint"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Response -->
+        <div class="pane">
+          <div class="pane-header">
+            <span class="pane-title">Response</span>
+            <div class="pane-actions">
+              <button class="icon-btn" id="copyRespBtn" onclick="copyResponse()" style="display:none">📋 Copy</button>
+              <button class="icon-btn" id="clearRespBtn" onclick="clearResponse()" style="display:none">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="resp-empty" id="responseEmpty">
+            <div class="resp-empty-icon">📭</div>
+            <span>Response will appear here</span>
+          </div>
+
+          <div id="responseSection" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+            <div class="resp-meta">
+              <span class="resp-status" id="respStatus">—</span>
+              <span class="resp-time" id="respTime"></span>
+              <span class="resp-size" id="respSize"></span>
+            </div>
+            <div class="resp-body" id="responseBody"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Schema Modal -->
+<div class="modal-bg" id="schemaModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>📐 Schema</span>
+      <button class="modal-close" onclick="closeSchemaModal()">✕</button>
+    </div>
+    <div id="schemaContent"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  aisUrl: '',
+  username: '',
+  password: '',
+  environment: '',
+  role: '',
+  orchestrations: [],
+  filtered: [],
+  selected: null,
+  activeTab: 'form',
+  history: [],
+  currentResponse: null,
+  historyOpen: false,
+};
+
+try {
+  const h = localStorage.getItem('jde_history');
+  if (h) state.history = JSON.parse(h);
+} catch(e) {}
+
+// ============================================================
+// CREDENTIALS PAYLOAD
+// ============================================================
+function creds() {
+  const c = {
+    username: state.username,
+    password: state.password,
+    deviceName: 'OrchestratorWorkbench'
+  };
+  if (state.environment) c.environment = state.environment;
+  if (state.role) c.role = state.role;
+  return c;
+}
+
+// ============================================================
+// LOAD ORCHESTRATIONS
+// ============================================================
+async function loadOrchestrations() {
+  const url    = document.getElementById('aisUrl').value.trim().replace(/\/$/, '');
+  const user   = document.getElementById('username').value.trim();
+  const pass   = document.getElementById('password').value;
+
+  if (!url || !user || !pass) {
+    toast('Please fill in Server URL, Username, and Password', 'error');
+    return;
+  }
+
+  state.aisUrl     = url;
+  state.username   = user;
+  state.password   = pass;
+  state.environment = document.getElementById('environment').value.trim();
+  state.role        = document.getElementById('role').value.trim();
+
+  const btn = document.getElementById('loadBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:white"></div> Loading…';
+
+  setPill('loading', 'Loading…');
+  document.getElementById('orchList').innerHTML =
+    '<div class="list-loading"><div class="spinner"></div> Fetching orchestrations…</div>';
+  document.getElementById('orchCount').textContent = '';
+
+  try {
+    const resp = await fetch(url + '/jderest/discover', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa(user + ':' + pass)
+      }
+    });
+
+    if (resp.status === 401 || resp.status === 403) {
+      throw new Error('Invalid credentials — check username and password');
+    }
+    if (!resp.ok) {
+      let msg = 'HTTP ' + resp.status;
+      try { const b = await resp.json(); msg += ': ' + (b.message || JSON.stringify(b)); } catch(e) {}
+      throw new Error(msg);
+    }
+
+    const data = await resp.json();
+    state.orchestrations = data.orchestrations || [];
+    state.filtered = [...state.orchestrations];
+
+    if (!state.orchestrations.length) {
+      setPill('ok', 'Connected — 0 orchestrations');
+      document.getElementById('orchList').innerHTML =
+        '<div class="list-empty"><div class="empty-icon">📭</div>No orchestrations found for this user.</div>';
+      document.getElementById('orchCount').textContent = '';
+    } else {
+      setPill('ok', user + ' · ' + state.orchestrations.length + ' orchestrations');
+      renderOrchList();
+      toast('Loaded ' + state.orchestrations.length + ' orchestrations', 'success');
+    }
+
+  } catch(e) {
+    setPill('err', 'Error');
+    document.getElementById('orchList').innerHTML =
+      '<div class="list-empty"><div class="empty-icon">⛔</div><strong style="color:var(--red)">Failed to load</strong><br><span style="font-size:11px">' + escHtml(e.message) + '</span></div>';
+    document.getElementById('orchCount').textContent = '';
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span> Load Orchestrations';
+  }
+}
+
+function setPill(type, text) {
+  const pill = document.getElementById('connPill');
+  const dot  = pill.querySelector('.dot');
+  pill.className = 'conn-pill ' + type;
+  dot.className  = 'dot' + (type === 'loading' ? ' pulse' : '');
+  document.getElementById('connText').textContent = text;
+}
+
+// ============================================================
+// FILTER + RENDER LIST
+// ============================================================
+function filterOrchestrations() {
+  const q = document.getElementById('orchSearch').value.toLowerCase();
+  state.filtered = q
+    ? state.orchestrations.filter(o =>
+        (o.name || '').toLowerCase().includes(q) ||
+        (o.description || '').toLowerCase().includes(q))
+    : [...state.orchestrations];
+  renderOrchList();
+}
+
+function renderOrchList() {
+  const list = document.getElementById('orchList');
+  const count = document.getElementById('orchCount');
+
+  if (!state.filtered.length) {
+    list.innerHTML = '<div class="list-empty">No results</div>';
+    count.textContent = '';
+    return;
+  }
+
+  count.textContent = state.filtered.length + ' of ' + state.orchestrations.length;
+
+  list.innerHTML = state.filtered.map(o => {
+    const idx = state.orchestrations.indexOf(o);
+    const badgeCls = o.udoGroup === 'Shared' ? 'badge-shared'
+                   : o.udoGroup === 'Personal' ? 'badge-personal'
+                   : 'badge-reserved';
+    const isActive = state.selected && (state.selected.omwObjectName || state.selected.name) === (o.omwObjectName || o.name);
+    return `<div class="orch-item${isActive ? ' active' : ''}"
+                 id="oitem-${idx}"
+                 onclick="selectOrchestration(${idx})">
+      <div class="orch-name">${escHtml(o.name || 'Unnamed')}</div>
+      ${o.description ? `<div class="orch-desc">${escHtml(o.description)}</div>` : ''}
+      <span class="orch-badge ${badgeCls}">${o.udoGroup || 'Unknown'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// SELECT ORCHESTRATION
+// ============================================================
+async function selectOrchestration(idx) {
+  const orch = state.orchestrations[idx];
+  if (!orch) return;
+
+  state.selected = orch;
+
+  // Highlight
+  document.querySelectorAll('.orch-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('oitem-' + idx);
+  if (el) el.classList.add('active');
+
+  // Always show workbench immediately with loading state
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('workbench').classList.add('visible');
+  validateFields();
+
+  const name = orch.name || 'Unnamed';
+  const path = '/jderest/orchestrator/' + (orch.omwObjectName || orch.name);
+  document.getElementById('orchTitle').textContent    = name;
+  document.getElementById('orchEndpoint').textContent = path;
+  document.getElementById('endpointHint').textContent = path;
+  clearResponse();
+  switchTab('form', document.getElementById('tab-form-btn'));
+
+  // Show loading state in form area
+  document.getElementById('formInputs').innerHTML = `
+    <div style="padding:30px;text-align:center;color:var(--text3);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div class="spinner" style="width:20px;height:20px;border-width:2px"></div>
+      Loading schema…
+    </div>`;
+
+  // Fetch full detail using the orchestration NAME (not omwObjectName)
+  // Only the name-based endpoint returns inp.array sub-fields
+  if (!orch._loaded) {
+    try {
+      const resp = await fetch(
+        state.aisUrl + '/jderest/discover/' + encodeURIComponent(orch.name),
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa(state.username + ':' + state.password)
+          }
+        }
+      );
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.orchestrations && data.orchestrations[0]) {
+          // Deep-merge — preserve array sub-fields
+          const detail = data.orchestrations[0];
+          // Replace inputs entirely from detail (detail has inp.array)
+          if (detail.inputs) orch.inputs = detail.inputs;
+          if (detail.outputs) orch.outputs = detail.outputs;
+          if (detail.longDescription !== undefined) orch.longDescription = detail.longDescription;
+        }
+      } else {
+        console.warn('Detail fetch failed:', resp.status);
+      }
+    } catch(e) {
+      console.warn('Detail fetch error:', e);
+    }
+    orch._loaded = true;
+  }
+
+  // Now build the form with full schema (including inp.array)
+  buildFormInputs(orch);
+  buildRawPayload(orch);
+}
+
+function showWorkbench(orch) {
+  // Header/path update only — form is built in selectOrchestration after detail fetch
+  const name = orch.name || 'Unnamed';
+  const path = '/jderest/orchestrator/' + (orch.omwObjectName || orch.name);
+  document.getElementById('orchTitle').textContent    = name;
+  document.getElementById('orchEndpoint').textContent = path;
+  document.getElementById('endpointHint').textContent = path;
+}
+
+// ============================================================
+// FORM BUILDER
+// ============================================================
+// ── ARRAY SCHEMA REGISTRY: fieldId -> [{name, type}] ──
+const arraySchemas = {};
+
+function buildFormInputs(orch) {
+  const inputs = orch.inputs || [];
+  const container = document.getElementById('formInputs');
+
+  // Clear old schemas
+  Object.keys(arraySchemas).forEach(k => delete arraySchemas[k]);
+
+  if (!inputs.length) {
+    container.innerHTML = `
+      <div style="padding:20px;color:var(--text3);font-size:12px;line-height:1.7;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px;opacity:0.3">📋</div>
+        No inputs defined for this orchestration.<br>Switch to <strong>Raw JSON</strong> to send a custom payload.
+      </div>`;
+    return;
+  }
+
+  // Register array schemas from inp.array before building HTML
+  inputs.forEach(inp => {
+    if (inp.type === 'Array') {
+      const fieldId = 'field-' + inp.name.replace(/\W/g,'_');
+      arraySchemas[fieldId] = inp.array || []; // [{name, type, required}]
+    }
+  });
+
+  container.innerHTML = inputs.map(inp => {
+    const isArray = inp.type === 'Array';
+    const fieldId = 'field-' + inp.name.replace(/\W/g,'_');
+    const schema  = arraySchemas[fieldId] || [];
+    const colCount = schema.length || 1;
+
+    return `
+    <div class="input-group" id="grp-${fieldId}">
+      <div class="input-label">
+        ${escHtml(inp.name)}
+        ${inp.required ? '<span class="req-star">*</span>' : ''}
+        <span class="type-badge">${escHtml(inp.type || 'String')}</span>
+        ${isArray && schema.length ? `<span style="font-size:9px;color:var(--text3)">${schema.map(s=>s.name).join(', ')}</span>` : ''}
+      </div>
+      ${isArray ? `
+        <div class="array-builder" id="ab-${fieldId}" data-field="${escHtml(inp.name)}">
+          ${schema.length ? `
+          <div class="array-header-row" style="display:grid;grid-template-columns:24px 1fr 28px;gap:6px;margin-bottom:4px;padding:0 0 4px 0;border-bottom:1px solid var(--border)">
+            <div></div>
+            <div style="display:grid;grid-template-columns:repeat(${colCount},1fr);gap:6px">
+              ${schema.map(s => `<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);padding:0 2px">${escHtml(s.name)}${s.required?'<span style="color:var(--red)">*</span>':''}</div>`).join('')}
+            </div>
+            <div></div>
+          </div>` : ''}
+          <div id="ab-rows-${fieldId}" class="ab-rows"></div>
+          <button class="array-add-btn" onclick="addArrayRow('${fieldId}')">＋ Add Row</button>
+        </div>
+        <span class="array-raw-toggle" onclick="toggleArrayRaw('${fieldId}')">⌥ switch to raw JSON</span>
+        <textarea class="form-input" id="ab-raw-${fieldId}"
+          data-field="${escHtml(inp.name)}" data-type="Array"
+          rows="4" placeholder='[{"key": "value"}]'
+          style="display:none;font-family:JetBrains Mono,monospace;font-size:11px;margin-top:4px"></textarea>
+      ` : `
+        <input class="form-input" type="text"
+          data-field="${escHtml(inp.name)}"
+          data-type="${escHtml(inp.type || 'String')}"
+          placeholder="${escHtml(inp.example || inp.defaultValue || inp.name)}"
+          value="${escHtml(inp.defaultValue || '')}">
+        ${inp.example ? `<div class="input-hint">e.g. ${escHtml(inp.example)}</div>` : ''}
+      `}
+    </div>`;
+  }).join('');
+
+  // Boot each array builder with one empty row
+  inputs.filter(i => i.type === 'Array').forEach(inp => {
+    const fieldId = 'field-' + inp.name.replace(/\W/g,'_');
+    addArrayRow(fieldId);
+  });
+}
+
+// ── ARRAY BUILDER HELPERS ──
+
+function addArrayRow(fieldId) {
+  const rowsEl = document.getElementById('ab-rows-' + fieldId);
+  if (!rowsEl) return;
+
+  const schema = arraySchemas[fieldId] || [];
+  const idx    = rowsEl.children.length;
+  const colCount = schema.length || 1;
+
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'array-row';
+  rowDiv.style.cssText = 'display:grid;grid-template-columns:24px 1fr 28px;gap:6px;align-items:center;margin-bottom:5px';
+  rowDiv.dataset.idx = idx;
+
+  // Row number
+  const numEl = document.createElement('div');
+  numEl.className = 'array-row-num';
+  numEl.textContent = idx + 1;
+
+  // Fields area
+  const fieldsEl = document.createElement('div');
+
+  if (schema.length > 0) {
+    // Object row: one input per schema field, laid out in a grid
+    fieldsEl.style.cssText = `display:grid;grid-template-columns:repeat(${colCount},1fr);gap:6px`;
+    schema.forEach(s => {
+      const inp = document.createElement('input');
+      inp.className = 'array-inner-input';
+      inp.dataset.key  = s.name;
+      inp.dataset.type = s.type || 'String';
+      inp.placeholder  = s.name;
+      inp.title        = s.name + ' (' + (s.type || 'String') + ')';
+      fieldsEl.appendChild(inp);
+    });
+  } else {
+    // Plain value row
+    fieldsEl.style.cssText = 'display:flex';
+    const inp = document.createElement('input');
+    inp.className = 'array-inner-input';
+    inp.dataset.key = '__val__';
+    inp.placeholder = 'value';
+    fieldsEl.appendChild(inp);
+  }
+
+  // Delete button
+  const delBtn = document.createElement('button');
+  delBtn.className  = 'array-del-btn';
+  delBtn.title      = 'Remove row';
+  delBtn.textContent = '✕';
+  delBtn.onclick = () => { rowDiv.remove(); renumberRows(fieldId); };
+
+  rowDiv.appendChild(numEl);
+  rowDiv.appendChild(fieldsEl);
+  rowDiv.appendChild(delBtn);
+  rowsEl.appendChild(rowDiv);
+}
+
+function renumberRows(fieldId) {
+  const rowsEl = document.getElementById('ab-rows-' + fieldId);
+  if (!rowsEl) return;
+  Array.from(rowsEl.children).forEach((row, i) => {
+    const num = row.querySelector('.array-row-num');
+    if (num) num.textContent = i + 1;
+    row.dataset.idx = i;
+  });
+}
+
+function toggleArrayRaw(fieldId) {
+  const builder = document.getElementById('ab-' + fieldId);
+  const rawTA   = document.getElementById('ab-raw-' + fieldId);
+  const toggle  = builder.parentElement.querySelector('.array-raw-toggle');
+  const isRaw   = rawTA.style.display !== 'none';
+
+  if (isRaw) {
+    try {
+      const parsed = JSON.parse(rawTA.value || '[]');
+      const rowsEl = document.getElementById('ab-rows-' + fieldId);
+      rowsEl.innerHTML = '';
+      const items = Array.isArray(parsed) ? parsed : [];
+      if (items.length) {
+        items.forEach((item, i) => {
+          addArrayRow(fieldId);
+          const row = rowsEl.children[i];
+          if (typeof item === 'object' && item !== null) {
+            Object.entries(item).forEach(([k, v]) => {
+              const el = row.querySelector(`[data-key="${CSS.escape(k)}"]`);
+              if (el) el.value = String(v);
+            });
+          } else {
+            const el = row.querySelector('[data-key="__val__"]');
+            if (el) el.value = String(item);
+          }
+        });
+      } else {
+        addArrayRow(fieldId);
+      }
+    } catch(e) { toast('Invalid JSON — fix before switching back', 'error'); return; }
+    builder.style.display = '';
+    rawTA.style.display   = 'none';
+    toggle.textContent    = '⌥ switch to raw JSON';
+  } else {
+    rawTA.value        = JSON.stringify(readArrayBuilder(fieldId), null, 2);
+    rawTA.dataset.field = builder.dataset.field;
+    rawTA.dataset.type  = 'Array';
+    builder.style.display = 'none';
+    rawTA.style.display   = '';
+    toggle.textContent    = '⌥ switch to builder';
+  }
+}
+
+function readArrayBuilder(fieldId) {
+  const rowsEl = document.getElementById('ab-rows-' + fieldId);
+  if (!rowsEl) return [];
+  const result = [];
+  Array.from(rowsEl.children).forEach(row => {
+    const inputs = row.querySelectorAll('.array-inner-input');
+    if (!inputs.length) return;
+    if (inputs[0].dataset.key === '__val__') {
+      if (inputs[0].value.trim()) result.push(inputs[0].value);
+    } else {
+      const obj = {};
+      inputs.forEach(inp => { obj[inp.dataset.key] = inp.value; });
+      result.push(obj);
+    }
+  });
+  return result;
+}
+
+function buildRawPayload(orch) {
+  const obj = {};
+  (orch.inputs || []).forEach(inp => {
+    obj[inp.name] = inp.type === 'Array' ? [] : (inp.defaultValue || '');
+  });
+  document.getElementById('rawPayload').value = JSON.stringify(obj, null, 2);
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.payload-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  state.activeTab = tab;
+
+  if (tab === 'form') {
+    document.getElementById('tab-form').style.display = '';
+    document.getElementById('rawPayload').style.display = 'none';
+  } else {
+    syncToRaw();
+    document.getElementById('tab-form').style.display = 'none';
+    document.getElementById('rawPayload').style.display = '';
+  }
+}
+
+function syncToRaw() {
+  const obj = {};
+
+  // Non-array form inputs
+  document.querySelectorAll('.form-input').forEach(f => {
+    if (!f.dataset.field) return;
+    const key = f.dataset.field, type = f.dataset.type, val = f.value;
+    if (type === 'Array') {
+      // raw textarea mode
+      try { obj[key] = JSON.parse(val || '[]'); } catch(e) { obj[key] = []; }
+    } else if (type === 'Numeric') {
+      obj[key] = val === '' ? '' : (isNaN(Number(val)) ? val : Number(val));
+    } else {
+      obj[key] = val;
+    }
+  });
+
+  // Array builders (visual mode)
+  document.querySelectorAll('.array-builder').forEach(ab => {
+    const key = ab.dataset.field;
+    if (!key) return;
+    const fieldId = ab.id.replace('ab-', '');
+    obj[key] = readArrayBuilder(fieldId);
+  });
+
+  document.getElementById('rawPayload').value = JSON.stringify(obj, null, 2);
+}
+
+function getPayload() {
+  if (state.activeTab === 'raw') {
+    try { return JSON.parse(document.getElementById('rawPayload').value || '{}'); }
+    catch(e) { throw new Error('Invalid JSON in payload'); }
+  }
+
+  const obj = {};
+
+  // Regular (non-array) inputs
+  document.querySelectorAll('.form-input').forEach(f => {
+    if (!f.dataset.field) return;
+    const key = f.dataset.field, type = f.dataset.type, val = f.value;
+    if (type === 'Array') {
+      // raw textarea mode
+      try { obj[key] = JSON.parse(val || '[]'); } catch(e) { obj[key] = []; }
+    } else if (type === 'Numeric') {
+      if (val !== '') obj[key] = isNaN(Number(val)) ? val : Number(val);
+    } else {
+      if (val !== '') obj[key] = val;
+    }
+  });
+
+  // Array builders (visual mode) — these win over raw textarea if visible
+  document.querySelectorAll('.array-builder').forEach(ab => {
+    if (ab.style.display === 'none') return; // raw mode active for this field
+    const key = ab.dataset.field;
+    if (!key) return;
+    const fieldId = ab.id.replace('ab-', '');
+    obj[key] = readArrayBuilder(fieldId);
+  });
+
+  return obj;
+}
+
+// ============================================================
+// SEND REQUEST
+// ============================================================
+async function sendRequest() {
+  if (!state.selected) { toast('Select an orchestration first', 'error'); return; }
+  if (!state.username) { toast('Enter credentials and load orchestrations first', 'error'); return; }
+
+  let payload;
+  try { payload = getPayload(); }
+  catch(e) { toast(e.message, 'error'); return; }
+
+  const orchName = state.selected.omwObjectName || state.selected.name;
+  const endpoint = state.aisUrl + '/jderest/orchestrator/' + encodeURIComponent(orchName);
+
+  // Merge credentials + user inputs
+  const body = { ...creds(), ...payload };
+
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('sendingIndicator').style.display = 'flex';
+
+  const t0 = Date.now();
+
+  try {
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const elapsed = Date.now() - t0;
+    const text    = await resp.text();
+    const size    = new Blob([text]).size;
+
+    let parsed;
+    try { parsed = JSON.parse(text); } catch(e) { parsed = text; }
+
+    showResponse(resp.status, elapsed, size, parsed);
+
+    addToHistory({
+      name: state.selected.name,
+      orchName,
+      ts: Date.now(),
+      status: resp.status,
+      elapsed,
+      ok: resp.ok
+    });
+
+    if (resp.ok) toast('✓ ' + resp.status + ' — success', 'success');
+    else toast('✗ ' + resp.status + ' — request failed', 'error');
+
+  } catch(e) {
+    const elapsed = Date.now() - t0;
+    showResponse(0, elapsed, 0, { error: e.message, hint: 'Check server URL and network' });
+    toast('Network error: ' + e.message, 'error');
+    addToHistory({ name: state.selected?.name || '?', orchName, ts: Date.now(), status: 0, elapsed, ok: false });
+  } finally {
+    validateFields(); // restore sendBtn state based on credentials
+    document.getElementById('sendingIndicator').style.display = 'none';
+  }
+}
+
+// ============================================================
+// RESPONSE
+// ============================================================
+function showResponse(status, elapsed, size, body) {
+  document.getElementById('responseEmpty').style.display = 'none';
+  const sec = document.getElementById('responseSection');
+  sec.style.display = 'flex';
+
+  const statusEl = document.getElementById('respStatus');
+  statusEl.textContent = status || 'ERR';
+  statusEl.className = 'resp-status ' + (status >= 200 && status < 300 ? 'resp-ok' : 'resp-err');
+
+  document.getElementById('respTime').textContent = formatMs(elapsed);
+  document.getElementById('respSize').textContent = size ? formatBytes(size) : '';
+
+  const bodyEl = document.getElementById('responseBody');
+  bodyEl.innerHTML = typeof body === 'object'
+    ? syntaxHL(JSON.stringify(body, null, 2))
+    : escHtml(String(body));
+
+  state.currentResponse = body;
+  document.getElementById('copyRespBtn').style.display = '';
+  document.getElementById('clearRespBtn').style.display = '';
+}
+
+function clearResponse() {
+  document.getElementById('responseEmpty').style.display = 'flex';
+  document.getElementById('responseSection').style.display = 'none';
+  document.getElementById('copyRespBtn').style.display = 'none';
+  document.getElementById('clearRespBtn').style.display = 'none';
+  state.currentResponse = null;
+}
+
+function copyResponse() {
+  const text = typeof state.currentResponse === 'object'
+    ? JSON.stringify(state.currentResponse, null, 2) : String(state.currentResponse);
+  navigator.clipboard.writeText(text).then(() => toast('Copied!', 'success'));
+}
+
+// ============================================================
+// SCHEMA MODAL
+// ============================================================
+function showSchemaModal() {
+  if (!state.selected) return;
+  const o = state.selected;
+  const inputs  = o.inputs  || [];
+  const outputs = o.outputs || [];
+  let html = '';
+
+  if (inputs.length) {
+    html += '<div class="section-label">Inputs (' + inputs.length + ')</div>';
+    html += inputs.map(f => `
+      <div class="schema-field">
+        <div class="schema-row">
+          <span class="schema-name">${escHtml(f.name)}</span>
+          <span class="schema-type">${escHtml(f.type || 'String')}</span>
+          ${f.required ? '<span class="schema-req">required</span>' : ''}
+        </div>
+        ${f.defaultValue ? `<div class="schema-detail">default: ${escHtml(f.defaultValue)}</div>` : ''}
+        ${f.example ? `<div class="schema-detail">example: ${escHtml(f.example)}</div>` : ''}
+        ${f.stepName ? `<div class="schema-detail" style="color:var(--text3)">step: ${escHtml(f.stepName)}</div>` : ''}
+      </div>`).join('');
+  } else {
+    html += '<div style="color:var(--text3);font-size:12px;margin-bottom:10px">No inputs defined.</div>';
+  }
+
+  if (outputs.length) {
+    html += '<div class="section-label">Outputs (' + outputs.length + ')</div>';
+    html += outputs.map(f => `
+      <div class="schema-field">
+        <div class="schema-row">
+          <span class="schema-name">${escHtml(f.name)}</span>
+          <span class="schema-type">${escHtml(f.type || 'String')}</span>
+        </div>
+        ${f.stepName ? `<div class="schema-detail">step: ${escHtml(f.stepName)}</div>` : ''}
+      </div>`).join('');
+  }
+
+  if (o.longDescription) {
+    html += '<div class="section-label">Description</div>';
+    html += `<div style="font-size:12px;color:var(--text2);line-height:1.7">${escHtml(o.longDescription)}</div>`;
+  }
+
+  document.getElementById('schemaContent').innerHTML = html;
+  document.getElementById('schemaModal').classList.add('show');
+}
+
+function closeSchemaModal() {
+  document.getElementById('schemaModal').classList.remove('show');
+}
+
+document.getElementById('schemaModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('schemaModal')) closeSchemaModal();
+});
+
+// ============================================================
+// HISTORY
+// ============================================================
+let historyOpen = false;
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('historyPanel').style.maxHeight = historyOpen ? '220px' : '0';
+  document.getElementById('historyPanel').style.overflow  = historyOpen ? 'auto' : 'hidden';
+  document.getElementById('historyChevron').textContent   = historyOpen ? '▼' : '▲';
+}
+
+// Start closed
+document.getElementById('historyPanel').style.maxHeight = '0';
+document.getElementById('historyPanel').style.overflow  = 'hidden';
+
+function addToHistory(entry) {
+  state.history.unshift(entry);
+  if (state.history.length > 100) state.history = state.history.slice(0, 100);
+  try { localStorage.setItem('jde_history', JSON.stringify(state.history)); } catch(e) {}
+  renderHistory();
+}
+
+function renderHistory() {
+  const panel = document.getElementById('historyPanel');
+  const empty = document.getElementById('historyEmpty');
+  if (!state.history.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const items = state.history.map((h, i) => `
+    <div class="history-item" onclick="replayHistory(${i})">
+      <div class="h-name">${escHtml(h.name)}</div>
+      <div class="h-meta">
+        <span class="h-status ${h.ok ? 'h-ok' : 'h-err'}">${h.status || 'ERR'}</span>
+        <span class="h-time">${formatMs(h.elapsed)}</span>
+        <span class="h-time">${formatDate(h.ts)}</span>
+      </div>
+    </div>`).join('');
+
+  panel.innerHTML = items;
+}
+
+function replayHistory(i) {
+  const h = state.history[i];
+  if (!h) return;
+  const orch = state.orchestrations.find(o =>
+    (o.omwObjectName || o.name) === h.orchName || o.name === h.name);
+  if (orch) {
+    selectOrchestration(state.orchestrations.indexOf(orch));
+  }
+  toast('Loaded from history', 'info');
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatMs(ms) {
+  if (ms >= 1000) return (ms / 1000).toFixed(2) + 's';
+  return ms + 'ms';
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+  return (b / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function formatDate(ts) {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function syntaxHL(json) {
+  return escHtml(json)
+    .replace(/(&quot;)(.*?)(&quot;)(\s*:)/g,
+      '<span class="json-key">$1$2$3</span>$4')
+    .replace(/:\s*(&quot;)(.*?)(&quot;)/g,
+      ': <span class="json-str">$1$2$3</span>')
+    .replace(/:\s*(-?\d+\.?\d*)/g,
+      ': <span class="json-num">$1</span>')
+    .replace(/:\s*(true|false)/g,
+      ': <span class="json-bool">$1</span>')
+    .replace(/:\s*(null)/g,
+      ': <span class="json-null">$1</span>');
+}
+
+function toast(msg, type = 'info') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ============================================================
+// VALIDATE FIELDS → enable/disable buttons
+// ============================================================
+function validateFields() {
+  const url  = document.getElementById('aisUrl').value.trim();
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value.trim();
+  const ok   = url.length > 0 && user.length > 0 && pass.length > 0;
+
+  const loadBtn = document.getElementById('loadBtn');
+  const sendBtn = document.getElementById('sendBtn');
+
+  loadBtn.disabled = !ok;
+  // sendBtn also requires credentials AND a selected orchestration
+  if (sendBtn) sendBtn.disabled = !(ok && state.selected);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderHistory();
+validateFields();
+
+// Allow Enter key on password to trigger load
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadOrchestrations();
+});
+</script>
+</body>
+</html>
