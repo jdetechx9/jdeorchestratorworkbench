@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JDE BSFN Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #eef1f8;
+  --surface: #ffffff;
+  --surface2: #f4f6fb;
+  --surface3: #edf0f7;
+  --border: #e2e7f0;
+  --border2: #cdd5e8;
+  --accent: #2563eb;
+  --accent-light: #eff4ff;
+  --accent-mid: #bfdbfe;
+  --accent-hover: #1d4ed8;
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --success-mid: #bbf7d0;
+  --error: #dc2626;
+  --error-light: #fef2f2;
+  --warn: #d97706;
+  --warn-light: #fffbeb;
+  --text: #0f172a;
+  --text2: #475569;
+  --text3: #94a3b8;
+  --text4: #cbd5e1;
+  --input-bg: #f8fafc;
+  --tag-in: #dbeafe;
+  --tag-in-text: #1e40af;
+  --tag-out: #dcfce7;
+  --tag-out-text: #15803d;
+  --tag-inout: #fef3c7;
+  --tag-inout-text: #92400e;
+  --radius: 12px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 24px rgba(0,0,0,.10);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.13);
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+header {
+  height: 58px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  position: relative;
+  z-index: 200;
+}
+.logo-mark {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 13px;
+  letter-spacing: -.5px;
+  box-shadow: 0 2px 8px rgba(37,99,235,.35);
+  flex-shrink: 0;
+}
+.header-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.header-sub { font-size: 12px; color: var(--text3); font-weight: 400; }
+.header-sep { width: 1px; height: 20px; background: var(--border); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.env-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 11px; color: var(--text2);
+}
+.env-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text4); }
+.env-dot.connected { background: var(--success); box-shadow: 0 0 0 2px rgba(22,163,74,.2); }
+#envLabel { font-family: 'DM Mono', monospace; font-weight: 500; }
+.version-chip {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  border: 1px solid var(--accent-mid);
+}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 58px);
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar {
+  width: 310px;
+  min-width: 310px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.section-block { margin-bottom: 20px; }
+.section-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.section-icon {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.si-blue { background: var(--accent-light); }
+.si-green { background: var(--success-light); }
+.si-amber { background: var(--warn-light); }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--text3); }
+
+.field { margin-bottom: 10px; }
+.field:last-child { margin-bottom: 0; }
+label.lbl {
+  display: block;
+  font-size: 11px; font-weight: 600;
+  color: var(--text2); margin-bottom: 5px;
+  letter-spacing: .2px;
+}
+.req-star { color: var(--error); margin-left: 2px; }
+
+input.inp, select.inp {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  -webkit-appearance: none;
+}
+input.inp:focus, select.inp:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  background: #fff;
+}
+input.inp::placeholder { color: var(--text4); }
+input.inp.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0 20px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all .18s;
+  white-space: nowrap;
+  letter-spacing: .1px;
+}
+.btn-full { width: 100%; }
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37,99,235,.3);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37,99,235,.4);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+
+.btn-success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22,163,74,.3);
+}
+.btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d, #166534);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(22,163,74,.4);
+}
+.btn-success:active:not(:disabled) { transform: translateY(0); }
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.spin {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: rgba(255,255,255,.9);
+  border-radius: 50%;
+  animation: rotating .65s linear infinite;
+  display: none;
+  flex-shrink: 0;
+}
+@keyframes rotating { to { transform: rotate(360deg); } }
+
+/* Alerts */
+.alert {
+  display: flex; gap: 9px; align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; line-height: 1.5;
+  margin-top: 10px;
+}
+.alert-warn { background: var(--warn-light); color: #92400e; border: 1px solid #fde68a; }
+.alert-err { background: var(--error-light); color: #991b1b; border: 1px solid #fecaca; }
+.alert-icon { flex-shrink: 0; margin-top: 1px; }
+
+/* ── MAIN ────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Empty state */
+.empty-state {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; text-align: center;
+  padding: 60px 40px;
+  animation: fadeIn .4s ease;
+}
+.empty-icon {
+  width: 72px; height: 72px;
+  background: var(--surface);
+  border: 2px dashed var(--border2);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+.empty-title { font-size: 16px; font-weight: 600; color: var(--text2); }
+.empty-desc { font-size: 13px; color: var(--text3); max-width: 300px; line-height: 1.6; }
+.empty-steps {
+  display: flex; gap: 8px; margin-top: 8px;
+  flex-wrap: wrap; justify-content: center;
+}
+.step-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; color: var(--text2);
+}
+.step-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent-light); color: var(--accent);
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: slideUp .3s ease;
+}
+@keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-header h3 { font-size: 13px; font-weight: 600; color: var(--text); }
+.card-header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* Info Card */
+.fn-info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  animation: slideUp .3s ease;
+}
+.fn-info-top { display: flex; align-items: flex-start; gap: 14px; }
+.fn-avatar {
+  width: 46px; height: 46px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent-light), #e0e7ff);
+  border: 1px solid var(--accent-mid);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.fn-name-line { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.fn-desc-line { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.fn-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.chip {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 9px; border-radius: 20px;
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  display: inline-flex; gap: 4px; align-items: center;
+}
+.chip b { color: var(--text); font-weight: 600; }
+
+/* Params table */
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.params-table th {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .6px; text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 14px; text-align: left;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.params-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.params-table tr:last-child td { border-bottom: none; }
+.params-table tbody tr { transition: background .1s; }
+.params-table tbody tr:hover td { background: #fafbff; }
+
+.p-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
+.p-name { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
+.p-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.p-dd { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
+.p-type { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); }
+
+.req-badge {
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--error);
+  margin-right: 4px; vertical-align: middle;
+  margin-top: -1px;
+}
+
+.io-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px;
+  white-space: nowrap; letter-spacing: .2px;
+}
+.io-input { background: var(--tag-in); color: var(--tag-in-text); }
+.io-output { background: var(--tag-out); color: var(--tag-out-text); }
+.io-both { background: var(--tag-inout); color: var(--tag-inout-text); }
+
+/* Parameter input in table */
+.p-input {
+  width: 100%; min-width: 160px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: var(--text);
+  background: var(--input-bg);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.p-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  background: #fff;
+}
+.p-input[readonly] {
+  background: var(--surface2);
+  color: var(--text3);
+  cursor: default;
+  font-style: italic;
+}
+.p-input.has-value { border-color: var(--accent-mid); background: var(--accent-light); color: var(--accent); font-style: normal; }
+.p-input.output-filled {
+  border-color: var(--success-mid);
+  background: var(--success-light);
+  color: var(--success);
+  font-style: normal;
+}
+
+/* Execute bar */
+.execute-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.execute-info { flex: 1; min-width: 180px; }
+.execute-info .ei-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.execute-info .ei-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.execute-actions { display: flex; gap: 8px; }
+
+/* Response */
+.response-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: slideUp .3s ease;
+}
+.response-header {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.response-header h3 { font-size: 13px; font-weight: 600; color: var(--text); }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: .2px;
+}
+.sp-ok { background: var(--success-light); color: var(--success); border: 1px solid var(--success-mid); }
+.sp-err { background: var(--error-light); color: var(--error); border: 1px solid #fecaca; }
+.sp-dot { width: 7px; height: 7px; border-radius: 50%; }
+.sp-dot-ok { background: var(--success); }
+.sp-dot-err { background: var(--error); }
+
+.tab-group { display: flex; gap: 2px; margin-left: auto; }
+.tab-btn {
+  font-size: 11px; font-weight: 600;
+  padding: 5px 11px; border-radius: var(--radius-sm);
+  cursor: pointer; border: none;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text3); background: transparent;
+  transition: all .15s;
+}
+.tab-btn.active {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+.tab-btn:hover:not(.active) { background: var(--surface3); color: var(--text2); }
+
+.response-body { padding: 18px; }
+
+/* Formatted output */
+.output-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 10px;
+}
+.output-grid { display: flex; flex-direction: column; gap: 8px; }
+.output-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: border-color .15s;
+}
+.output-item:hover { border-color: var(--accent-mid); }
+.out-num {
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  font-family: 'DM Mono', monospace;
+  margin-top: 1px;
+}
+.out-content { flex: 1; min-width: 0; }
+.out-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+.out-value {
+  font-size: 14px; font-weight: 600;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  word-break: break-all;
+}
+.out-value.empty { color: var(--text4); font-style: italic; font-weight: 400; font-size: 12px; }
+.out-meta { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.out-meta-tag {
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  color: var(--text3); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px;
+}
+
+/* Raw JSON */
+.json-viewer {
+  background: #0f172a;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  overflow: auto;
+  max-height: 480px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; line-height: 1.7;
+  color: #e2e8f0;
+}
+.jk { color: #93c5fd; }   /* key */
+.jvs { color: #86efac; }  /* string value */
+.jvn { color: #fda4af; }  /* number */
+.jvb { color: #c4b5fd; }  /* bool */
+.jnull { color: #94a3b8; font-style: italic; }
+.jp { color: #64748b; }   /* punctuation */
+
+/* Metadata row */
+.meta-info-bar {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+.mi-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text3);
+}
+.mi-val { font-family: 'DM Mono', monospace; color: var(--text2); font-weight: 500; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* Count badge */
+.count-badge {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid var(--accent-mid);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Tooltip */
+[data-tip] { position: relative; cursor: default; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%; transform: translateX(-50%);
+  background: #0f172a; color: #f1f5f9;
+  font-size: 11px; white-space: nowrap;
+  padding: 4px 8px; border-radius: 5px;
+  pointer-events: none; z-index: 999;
+}
+
+/* Clear btn */
+.clear-btn {
+  font-size: 11px; color: var(--text3); background: none; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 2px 4px;
+  border-radius: 4px; transition: color .15s;
+}
+.clear-btn:hover { color: var(--error); }
+
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────────────────────── -->
+<header>
+  <div class="logo-mark">JDE</div>
+  <div>
+    <div class="header-title">BSFN Workbench</div>
+  </div>
+  <div class="header-sep"></div>
+  <div style="font-size:12px;color:var(--text3)">Business Function Explorer &amp; Executor</div>
+  <div class="header-right">
+    <div class="env-badge">
+      <div class="env-dot" id="connDot"></div>
+      <span id="envLabel">Not Connected</span>
+    </div>
+    <div class="version-chip">AIS v2</div>
+  </div>
+</header>
+
+<!-- ── APP LAYOUT ────────────────────────────────────────────────── -->
+<div class="app-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-scroll">
+
+      <!-- AIS Server -->
+      <div class="section-block">
+        <div class="section-header">
+          <div class="section-icon si-blue">🔌</div>
+          <div class="section-title">AIS Server</div>
+        </div>
+        <div class="field">
+          <label class="lbl">Server URL <span class="req-star">*</span></label>
+          <input class="inp" id="serverUrl" type="url" placeholder="https://your-jde-server.com" />
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Authentication -->
+      <div class="section-block">
+        <div class="section-header">
+          <div class="section-icon si-amber">🔐</div>
+          <div class="section-title">Authentication</div>
+        </div>
+        <div class="field">
+          <label class="lbl">Username <span class="req-star">*</span></label>
+          <input class="inp" id="username" type="text" placeholder="JDE1" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label class="lbl">Password <span class="req-star">*</span></label>
+          <input class="inp" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="lbl">Environment <span class="req-star">*</span></label>
+            <input class="inp" id="environment" type="text" placeholder="JDV920" />
+          </div>
+          <div class="field">
+            <label class="lbl">Role</label>
+            <input class="inp" id="role" type="text" placeholder="*ALL" />
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Business Function -->
+      <div class="section-block">
+        <div class="section-header">
+          <div class="section-icon si-green">⚙️</div>
+          <div class="section-title">Business Function</div>
+        </div>
+        <div class="field">
+          <label class="lbl">BSFN Object Name <span class="req-star">*</span></label>
+          <input class="inp mono" id="bsfnName" type="text" placeholder="B0000130"
+            onkeydown="if(event.key==='Enter') loadStructure()"
+            oninput="this.value=this.value.toUpperCase()" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="loadBtn" onclick="loadStructure()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span id="loadTxt">Load Structure</span>
+        <div class="spin" id="loadSpin"></div>
+      </button>
+
+      <div id="sideAlert"></div>
+
+      <!-- History -->
+      <div id="historyBlock" style="margin-top:18px;display:none">
+        <div class="section-header" style="margin-bottom:8px">
+          <div class="section-title">Recent Functions</div>
+          <button class="clear-btn" onclick="clearHistory()" style="margin-left:auto">Clear</button>
+        </div>
+        <div id="historyList" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────────────────────────────────── -->
+  <main class="main" id="mainArea">
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🔧</div>
+      <div class="empty-title">No Function Loaded</div>
+      <div class="empty-desc">Connect to your JDE AIS server, enter credentials and a Business Function name to explore and execute it.</div>
+      <div class="empty-steps">
+        <div class="step-chip"><div class="step-num">1</div> Enter server &amp; credentials</div>
+        <div class="step-chip"><div class="step-num">2</div> Enter BSFN object name</div>
+        <div class="step-chip"><div class="step-num">3</div> Load structure</div>
+        <div class="step-chip"><div class="step-num">4</div> Fill inputs &amp; execute</div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+// ────────────────────────────────────────────────────────────────────────
+// State
+// ────────────────────────────────────────────────────────────────────────
+let currentFn = null;
+let currentParams = [];
+let responseVisible = false;
+let history = JSON.parse(localStorage.getItem('bsfn_history') || '[]');
+let activeTab = 'formatted';
+
+// ────────────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const val = id => $(id).value.trim();
+
+function baseUrl() {
+  let u = val('serverUrl').replace(/\/+$/, '');
+  if (u && !u.startsWith('http')) u = 'https://' + u;
+  return u;
+}
+
+function basicAuth() {
+  return 'Basic ' + btoa(val('username') + ':' + val('password'));
+}
+
+function setBtn(id, spinId, txtId, loading, label) {
+  $(id).disabled = loading;
+  $(spinId).style.display = loading ? 'block' : 'none';
+  $(txtId).textContent = label;
+}
+
+function showSideAlert(msg, type) {
+  $('sideAlert').innerHTML = msg
+    ? `<div class="alert alert-${type}"><span class="alert-icon">${type==='err'?'❌':'⚠️'}</span><div>${msg}</div></div>`
+    : '';
+}
+
+function validate() {
+  const checks = [
+    [val('serverUrl'), 'Server URL is required'],
+    [val('username'),  'Username is required'],
+    [val('password'),  'Password is required'],
+    [val('environment'), 'Environment is required'],
+    [val('bsfnName'),  'BSFN Object Name is required'],
+  ];
+  for (const [v, msg] of checks) {
+    if (!v) { showSideAlert(msg, 'warn'); return false; }
+  }
+  showSideAlert('', '');
+  return true;
+}
+
+function ioTag(ioType) {
+  if (ioType === 1) return '<span class="io-tag io-input">↓ Input</span>';
+  if (ioType === 2) return '<span class="io-tag io-output">↑ Output</span>';
+  return '<span class="io-tag io-both">↕ In/Out</span>';
+}
+
+function dtLabel(dt) {
+  const m = { 1: 'Numeric', 2: 'String', 3: 'Date', 4: 'Integer', 5: 'Char', 6: 'Math', 7: 'ID' };
+  return m[dt] || 'Type ' + dt;
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// History
+// ────────────────────────────────────────────────────────────────────────
+function saveHistory(name, desc) {
+  history = [{ name, desc }, ...history.filter(h => h.name !== name)].slice(0, 8);
+  localStorage.setItem('bsfn_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!history.length) { $('historyBlock').style.display = 'none'; return; }
+  $('historyBlock').style.display = 'block';
+  $('historyList').innerHTML = history.map(h => `
+    <button onclick="loadFromHistory('${h.name}')" style="
+      display:flex;align-items:center;gap:8px;
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:7px 10px;
+      cursor:pointer;text-align:left;width:100%;
+      font-family:inherit;transition:all .15s;
+    " onmouseover="this.style.borderColor='var(--accent-mid)'" onmouseout="this.style.borderColor='var(--border)'">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--accent);min-width:70px">${h.name}</span>
+      <span style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${h.desc || ''}</span>
+    </button>
+  `).join('');
+}
+
+function loadFromHistory(name) {
+  $('bsfnName').value = name;
+  loadStructure();
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('bsfn_history');
+  renderHistory();
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// LOAD STRUCTURE  (POST /jderest/v2/bsfnservice/discover)
+// ────────────────────────────────────────────────────────────────────────
+async function loadStructure() {
+  if (!validate()) return;
+  setBtn('loadBtn','loadSpin','loadTxt', true, 'Loading…');
+
+  const url = `${baseUrl()}/jderest/v2/bsfnservice/discover`;
+  const body = { objectName: val('bsfnName'), returnDetail: true };
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': basicAuth() },
+      body: JSON.stringify(body)
+    });
+
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { throw new Error('Non-JSON response: ' + raw.substring(0,200)); }
+
+    if (!res.ok) {
+      const msg = data?.message || data?.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    const fn = data.functions?.[0];
+    if (!fn) throw new Error('No function found in response');
+
+    currentFn = fn;
+    currentParams = fn.dataStructureDetail || [];
+    saveHistory(fn.objectName, fn.description);
+    updateEnvBadge(true);
+    renderWorkbench(fn);
+    showSideAlert('', '');
+
+  } catch (e) {
+    showSideAlert(e.message, 'err');
+    updateEnvBadge(false);
+  } finally {
+    setBtn('loadBtn','loadSpin','loadTxt', false, 'Load Structure');
+  }
+}
+
+function updateEnvBadge(ok) {
+  $('connDot').className = 'env-dot' + (ok ? ' connected' : '');
+  const env = val('environment') || '—';
+  $('envLabel').textContent = ok ? env : 'Not Connected';
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// RENDER WORKBENCH
+// ────────────────────────────────────────────────────────────────────────
+function renderWorkbench(fn) {
+  const params = fn.dataStructureDetail || [];
+  const inCount = params.filter(p => p.ioType === 0 || p.ioType === 1).length;
+  const outCount = params.filter(p => p.ioType === 0 || p.ioType === 2).length;
+
+  const main = $('mainArea');
+  main.innerHTML = '';
+
+  // ── Function Info Card ──────────────────────────────────────
+  const infoCard = document.createElement('div');
+  infoCard.className = 'fn-info-card';
+  infoCard.innerHTML = `
+    <div class="fn-info-top">
+      <div class="fn-avatar">⚙️</div>
+      <div style="flex:1;min-width:0">
+        <div class="fn-name-line">${fn.name || fn.objectName}</div>
+        <div class="fn-desc-line">${fn.description || 'No description available'}</div>
+      </div>
+    </div>
+    <div class="fn-chips">
+      <div class="chip"><b>Object</b> ${fn.objectName}</div>
+      <div class="chip"><b>Template</b> ${fn.template || '—'}</div>
+      <div class="chip"><b>DLL</b> ${fn.parentDll || '—'}</div>
+      <div class="chip"><b>System</b> ${fn.systemCode || '—'}</div>
+      <div class="chip"><b>Source</b> ${fn.source || '—'}</div>
+      <div class="chip"><b>Parameters</b> ${params.length}</div>
+      <div class="chip"><b>Inputs</b> ${inCount}</div>
+      <div class="chip"><b>Outputs</b> ${outCount}</div>
+    </div>
+  `;
+  main.appendChild(infoCard);
+
+  // ── Parameters Card ─────────────────────────────────────────
+  const paramCard = document.createElement('div');
+  paramCard.className = 'card';
+
+  paramCard.innerHTML = `
+    <div class="card-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      <h3>Data Structure</h3>
+      <div class="card-header-right">
+        <span class="count-badge">${params.length} params</span>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="clearInputs()">
+          Clear Inputs
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="params-table">
+        <thead>
+          <tr>
+            <th style="width:40px">ID</th>
+            <th>Parameter</th>
+            <th>DD Item</th>
+            <th>Data Type</th>
+            <th>I/O</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${params.map(p => {
+            const isReadOnly = p.ioType === 2; // pure output
+            const isRequired = p.required;
+            return `
+            <tr>
+              <td class="p-num">${p.controlId}</td>
+              <td>
+                <div class="p-name">${isRequired ? '<span class="req-badge" data-tip="Required"></span>' : ''}${p.name}</div>
+                <div class="p-desc">${p.description || ''}</div>
+              </td>
+              <td><span class="p-dd">${p.ddItem || '—'}</span></td>
+              <td><span class="p-type">${dtLabel(p.datatype)}</span></td>
+              <td>${ioTag(p.ioType)}</td>
+              <td>
+                <input
+                  class="p-input"
+                  id="p_${p.controlId}"
+                  data-id="${p.controlId}"
+                  data-io="${p.ioType}"
+                  ${isReadOnly ? 'readonly placeholder="(output)"' : `placeholder="Enter value…"`}
+                  type="text"
+                  ${isReadOnly ? '' : `oninput="onParamInput(this)"`}
+                />
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  main.appendChild(paramCard);
+
+  // ── Execute Bar ──────────────────────────────────────────────
+  const execBar = document.createElement('div');
+  execBar.className = 'execute-bar';
+  execBar.innerHTML = `
+    <div class="execute-info">
+      <div class="ei-title">Ready to Execute</div>
+      <div class="ei-sub">Fill in input parameters above, then run the business function against JDE.</div>
+    </div>
+    <div class="execute-actions">
+      <button class="btn btn-ghost" onclick="clearInputs()" style="white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        Reset
+      </button>
+      <button class="btn btn-success" id="execBtn" onclick="executeFunction()" style="min-width:180px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="execTxt">Execute Function</span>
+        <div class="spin" id="execSpin"></div>
+      </button>
+    </div>
+  `;
+  main.appendChild(execBar);
+
+  // ── Response placeholder ─────────────────────────────────────
+  const respDiv = document.createElement('div');
+  respDiv.id = 'responseArea';
+  main.appendChild(respDiv);
+}
+
+function onParamInput(el) {
+  el.classList.toggle('has-value', el.value.trim() !== '');
+}
+
+function clearInputs() {
+  currentParams.forEach(p => {
+    const el = $('p_' + p.controlId);
+    if (el && !el.readOnly) {
+      el.value = '';
+      el.classList.remove('has-value', 'output-filled');
+    }
+    if (el && el.readOnly) {
+      el.value = '';
+      el.classList.remove('output-filled');
+    }
+  });
+  $('responseArea').innerHTML = '';
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// EXECUTE  (POST /jderest/v2/bsfnservice)
+// ────────────────────────────────────────────────────────────────────────
+async function executeFunction() {
+  if (!currentFn) return;
+  setBtn('execBtn','execSpin','execTxt', true, 'Executing…');
+
+  // Build inParams from all non-pure-output fields that have a value
+  const inParams = [];
+  currentParams.forEach(p => {
+    const el = $('p_' + p.controlId);
+    if (!el) return;
+    // ioType 2 = pure output → skip
+    if (p.ioType === 2) return;
+    const v = el.value.trim();
+    if (v !== '') {
+      inParams.push({ id: p.controlId, value: v });
+    }
+  });
+
+  // Request all param IDs as outputIds
+  const outputIds = currentParams.map(p => p.controlId);
+
+  const body = {
+    name: currentFn.name,
+    isAsync: false,
+    inParams: inParams,
+    outputIds: outputIds
+  };
+
+  const execUrl = `${baseUrl()}/jderest/v2/bsfnservice`;
+  const t0 = Date.now();
+
+  try {
+    const res = await fetch(execUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': basicAuth() },
+      body: JSON.stringify(body)
+    });
+
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { throw new Error('Non-JSON response: ' + raw.substring(0,300)); }
+
+    const elapsed = Date.now() - t0;
+    renderResponse(data, res.ok, res.status, elapsed);
+
+  } catch (e) {
+    renderResponse({ error: e.message }, false, 0, Date.now() - t0);
+  } finally {
+    setBtn('execBtn','execSpin','execTxt', false, 'Execute Function');
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// RENDER RESPONSE
+// ────────────────────────────────────────────────────────────────────────
+function renderResponse(data, ok, status, elapsed) {
+  const area = $('responseArea');
+  const output = data?.result?.output || [];
+  const paramMap = {};
+  currentParams.forEach(p => { paramMap[p.controlId] = p; });
+
+  // Fill output values back into table cells
+  output.forEach(o => {
+    const el = $('p_' + o.id);
+    if (el && el.readOnly && o.value !== undefined && o.value !== null) {
+      el.value = String(o.value);
+      el.classList.add('output-filled');
+    }
+  });
+
+  activeTab = 'formatted';
+
+  const formattedHtml = output.length
+    ? `<div class="output-grid">
+        ${output.map(o => {
+          const p = paramMap[o.id];
+          const isEmpty = (o.value === undefined || o.value === null || o.value === '');
+          return `
+          <div class="output-item">
+            <div class="out-num">${o.id}</div>
+            <div class="out-content">
+              <div class="out-label">${p ? p.description : 'Parameter ' + o.id}</div>
+              <div class="out-value ${isEmpty ? 'empty' : ''}">${isEmpty ? 'No value returned' : escHtml(String(o.value))}</div>
+              ${p ? `<div class="out-meta">
+                <span class="out-meta-tag">${p.name}</span>
+                <span class="out-meta-tag">${p.ddItem}</span>
+                <span class="out-meta-tag">${dtLabel(p.datatype)}</span>
+                ${ioTag(p.ioType)}
+              </div>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`
+    : `<div style="color:var(--text3);font-size:13px;padding:8px 0">
+        ${ok ? 'Function executed — no output values returned.' : 'Execution failed. See Raw JSON for details.'}
+       </div>`;
+
+  area.innerHTML = `
+    <div class="response-card">
+      <div class="response-header">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <h3>Response</h3>
+        ${ok
+          ? `<span class="status-pill sp-ok"><span class="sp-dot sp-dot-ok"></span>Success${data.submitted ? ' · Submitted' : ''}</span>`
+          : `<span class="status-pill sp-err"><span class="sp-dot sp-dot-err"></span>Error${status ? ' · ' + status : ''}</span>`
+        }
+        ${data.name ? `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${escHtml(data.name)}</span>` : ''}
+        <div class="tab-group">
+          <button class="tab-btn active" id="tabBtnF" onclick="switchTab('formatted')">Formatted</button>
+          <button class="tab-btn" id="tabBtnR" onclick="switchTab('raw')">Raw JSON</button>
+        </div>
+      </div>
+      <div class="response-body">
+        <div id="tabFormatted">${formattedHtml}</div>
+        <div id="tabRaw" style="display:none">
+          <div class="json-viewer">${syntaxHL(JSON.stringify(data, null, 2))}</div>
+        </div>
+      </div>
+      <div class="meta-info-bar">
+        <div class="mi-item">⏱ <span class="mi-val">${elapsed}ms</span></div>
+        ${data.template ? `<div class="mi-item" style="margin-left:8px">Template <span class="mi-val">${escHtml(data.template)}</span></div>` : ''}
+        ${output.length ? `<div class="mi-item" style="margin-left:8px">Output params <span class="mi-val">${output.length}</span></div>` : ''}
+        <div class="mi-item" style="margin-left:auto;font-size:10px;color:var(--text4)">${new Date().toLocaleTimeString()}</div>
+      </div>
+    </div>
+  `;
+
+  area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  $('tabFormatted').style.display = tab === 'formatted' ? '' : 'none';
+  $('tabRaw').style.display      = tab === 'raw'       ? '' : 'none';
+  $('tabBtnF').classList.toggle('active', tab === 'formatted');
+  $('tabBtnR').classList.toggle('active', tab === 'raw');
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Utils
+// ────────────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function syntaxHL(json) {
+  return escHtml(json).replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    m => {
+      if (/^"/.test(m))   return /:$/.test(m) ? `<span class="jk">${m}</span>` : `<span class="jvs">${m}</span>`;
+      if (/true|false/.test(m)) return `<span class="jvb">${m}</span>`;
+      if (/null/.test(m)) return `<span class="jnull">${m}</span>`;
+      return `<span class="jvn">${m}</span>`;
+    }
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Init
+// ────────────────────────────────────────────────────────────────────────
+renderHistory();
+</script>
+</body>
+</html>
